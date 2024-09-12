@@ -156,7 +156,7 @@ const TodoList = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.text("To-Do List", 14, 20);
+    doc.text("Vistry Group Deliveries", 14, 20);
     doc.autoTable({
       startY: 30,
       head: [
@@ -181,6 +181,7 @@ const TodoList = () => {
       ]),
     });
     doc.save("todo-list.pdf");
+    setTodos([]);
   };
 
   const columns = [
