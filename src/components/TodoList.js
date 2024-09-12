@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import logo from "../images/logo.jpeg";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +29,7 @@ const TodoList = () => {
     timeIn: null,
     timeOut: null,
   });
+
   const [editingIndex, setEditingIndex] = useState(null);
   const [nameOptions, setNameOptions] = useState([
     "Andy",
@@ -61,7 +63,19 @@ const TodoList = () => {
     "Travis Perkins",
     "NW Fuel",
     "Hertings",
+    "P P Connor",
+    "Marshalls",
+    "Worseley",
   ]);
+
+  const isButton =
+    formData.name.trim().length === 0 ||
+    formData.employer.trim().length === 0 ||
+    formData.vehicleReg.trim().length === 0 ||
+    formData.inductionNum.trim().length === 0 ||
+    formData.timeIn === null ||
+    formData.timeOut === null;
+
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState(null);
 
   useEffect(() => {
@@ -70,11 +84,6 @@ const TodoList = () => {
       JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
     setTodos(savedTodos);
   }, []);
-
-  useEffect(() => {
-    // Save todos to local storage whenever todos change
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -113,9 +122,14 @@ const TodoList = () => {
     if (editingIndex !== null) {
       const updatedTodos = [...todos];
       updatedTodos[editingIndex] = formData;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
       setTodos(updatedTodos);
       setEditingIndex(null);
     } else {
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify([...todos, { ...formData }])
+      );
       setTodos([...todos, { ...formData }]);
     }
 
@@ -156,7 +170,8 @@ const TodoList = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.text("Vistry Group Deliveries", 14, 20);
+    doc.addImage(logo, "JPEG", 14, 10, 40, 20); // Adjust the x, y, width, and height to your preference
+
     doc.autoTable({
       startY: 30,
       head: [
@@ -181,7 +196,6 @@ const TodoList = () => {
       ]),
     });
     doc.save("todo-list.pdf");
-    setTodos([]);
   };
 
   const columns = [
@@ -212,7 +226,10 @@ const TodoList = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Vistry Group Deliveries</h2>
+      <div style={styles.logoImageContainer}>
+        <img src={logo} alt="logo" style={styles.logoImage} />
+      </div>
+      {/* <h2 style={styles.header}>Vistry Group Deliveries</h2> */}
       <div style={styles.form}>
         <AutoComplete
           value={formData.name}
@@ -221,7 +238,7 @@ const TodoList = () => {
           style={styles.input}
           placeholder="Select or Enter Name"
         >
-          {nameOptions.map((name) => (
+          {nameOptions.sort().map((name) => (
             <AutoComplete.Option key={name} value={name}>
               {name}
             </AutoComplete.Option>
@@ -244,7 +261,7 @@ const TodoList = () => {
           style={styles.input}
           placeholder="Select or Enter Company Name"
         >
-          {companyOptions.map((company) => (
+          {companyOptions.sort().map((company) => (
             <AutoComplete.Option key={company} value={company}>
               {company}
             </AutoComplete.Option>
@@ -294,7 +311,11 @@ const TodoList = () => {
           }
           style={styles.timePicker}
         />
-        <Button onClick={addTodo} style={styles.addButton}>
+        <Button
+          onClick={addTodo}
+          style={isButton ? styles.GrayButton : styles.addButton}
+          disabled={isButton}
+        >
           {editingIndex !== null ? "Update" : "Add"}
         </Button>
       </div>
@@ -305,10 +326,19 @@ const TodoList = () => {
         rowKey="date" // Or another unique identifier
         style={styles.table}
       />
-
-      <Button onClick={downloadPDF} style={styles.downloadButton}>
-        Download PDF
-      </Button>
+      {todos.length > 0 && (
+        <div style={styles.btns}>
+          <Button onClick={downloadPDF} style={styles.downloadButton}>
+            Download PDF
+          </Button>
+          <Button
+            onClick={() => setTodos([])}
+            style={styles.downloadDeleteButton}
+          >
+            Delete All Enteries
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -320,10 +350,13 @@ const styles = {
     fontFamily: "Arial, sans-serif",
     marginTop: "20px",
   },
-  header: {
-    textAlign: "center",
-    marginBottom: "20px",
-    fontSize: "24px",
+  logoImageContainer: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+  },
+  logoImage: {
+    width: "300px",
   },
   form: {
     display: "flex",
@@ -348,9 +381,24 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
   },
+  GrayButton: {
+    padding: "10px 20px",
+    backgroundColor: "grey",
+    color: "white",
+    fontSize: "16px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
   table: {
     width: "100%",
   },
+
+  btns: {
+    display: "flex",
+    alignItems: "center",
+  },
+
   downloadButton: {
     backgroundColor: "#2196F3",
     color: "white",
@@ -360,6 +408,17 @@ const styles = {
     cursor: "pointer",
     display: "block",
     marginTop: "20px",
+  },
+  downloadDeleteButton: {
+    backgroundColor: "#d11a2a",
+    color: "white",
+    fontSize: "16px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    display: "block",
+    marginTop: "20px",
+    marginLeft: "10px",
   },
 };
 
