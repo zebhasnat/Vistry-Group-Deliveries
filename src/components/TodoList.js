@@ -29,7 +29,8 @@ const TodoList = () => {
     timeIn: null,
     timeOut: null,
   });
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(70);
   const [editingIndex, setEditingIndex] = useState(null);
   const [nameOptions, setNameOptions] = useState([
     "Andy",
@@ -145,8 +146,9 @@ const TodoList = () => {
   };
 
   const editTodo = (index) => {
-    setFormData(todos[index]);
-    setEditingIndex(index);
+    const actualIndex = (currentPage - 1) * pageSize + index;
+    setFormData(todos[actualIndex]);
+    setEditingIndex(actualIndex);
   };
 
   const confirmDelete = (index) => {
@@ -166,6 +168,23 @@ const TodoList = () => {
     const updatedTodos = todos.filter((_, i) => i !== index);
     setTodos(updatedTodos);
     setConfirmDeleteIndex(null);
+  };
+
+  const confirmDeleteAll = () => {
+    Modal.confirm({
+      title: "Are you sure you want to delete all item?",
+      content: "This action cannot be undone.",
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => handleDeleteAll(),
+      onCancel: () => setConfirmDeleteIndex(null),
+    });
+  };
+
+  const handleDeleteAll = (index) => {
+    setTodos([]);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
 
   const downloadPDF = () => {
@@ -324,6 +343,7 @@ const TodoList = () => {
         dataSource={todos}
         columns={columns}
         rowKey="date" // Or another unique identifier
+        pagination={{ pageSize }} // Control page size
         style={styles.table}
       />
       {todos.length > 0 && (
@@ -332,7 +352,7 @@ const TodoList = () => {
             Download PDF
           </Button>
           <Button
-            onClick={() => setTodos([])}
+            onClick={confirmDeleteAll}
             style={styles.downloadDeleteButton}
           >
             Delete All Enteries
