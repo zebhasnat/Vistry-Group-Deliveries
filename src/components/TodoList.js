@@ -121,25 +121,16 @@ const TodoList = () => {
   const addTodo = () => {
     if (editingIndex !== null) {
       const updatedTodos = [...todos];
-      updatedTodos[editingIndex] = {
-        ...formData,
-        timeIn: formData.timeIn ? formData.timeIn : null,
-        timeOut: formData.timeOut ? formData.timeOut : null,
-      };
+      updatedTodos[editingIndex] = formData;
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
       setTodos(updatedTodos);
       setEditingIndex(null);
     } else {
-      const newTodo = {
-        ...formData,
-        timeIn: formData.timeIn ? formData.timeIn : null,
-        timeOut: formData.timeOut ? formData.timeOut : null,
-      };
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
-        JSON.stringify([...todos, newTodo])
+        JSON.stringify([...todos, { ...formData }])
       );
-      setTodos([...todos, newTodo]);
+      setTodos([...todos, { ...formData }]);
     }
 
     setFormData({
@@ -151,16 +142,6 @@ const TodoList = () => {
       timeIn: null,
       timeOut: null,
     });
-  };
-
-  const handleTimeNow = (field) => {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-    setFormData({ ...formData, [field]: timeString });
   };
 
   const editTodo = (index) => {
@@ -209,6 +190,7 @@ const TodoList = () => {
   const downloadPDF = () => {
     const doc = new jsPDF();
     doc.addImage(logo, "JPEG", 14, 10, 40, 20); // Adjust the x, y, width, and height to your preference
+
     doc.autoTable({
       startY: 30,
       head: [
@@ -232,15 +214,7 @@ const TodoList = () => {
         todo.timeOut,
       ]),
     });
-    const currentDate = new Date()
-      .toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      .replace(/\//g, "-");
-
-    doc.save(`DR-${currentDate}.pdf`);
+    doc.save("todo-list.pdf");
   };
 
   const columns = [
@@ -336,54 +310,26 @@ const TodoList = () => {
           onChange={handleInputChange}
           style={styles.input}
         />
-        {editingIndex !== null ? (
-          <TimePicker
-            name="timeIn"
-            placeholder="Time In"
-            format="HH:mm"
-            value={formData.timeIn ? moment(formData.timeIn, "HH:mm") : null}
-            onChange={(time, timeString) =>
-              handleTimeChange(time, timeString, "timeIn")
-            }
-            style={styles.timePicker}
-            showNow={false} // Disable the dropdown
-            allowClear={false} // Prevent clearing the input
-          />
-        ) : (
-          <Button
-            onClick={() => handleTimeNow("timeIn")}
-            style={
-              formData.timeIn ? styles.timeButton : styles.timeButtonUnactive
-            }
-          >
-            Time In Now
-          </Button>
-        )}
-
-        {/* Time Out Field */}
-        {editingIndex !== null ? (
-          <TimePicker
-            name="timeOut"
-            placeholder="Time Out"
-            format="HH:mm"
-            value={formData.timeOut ? moment(formData.timeOut, "HH:mm") : null}
-            onChange={(time, timeString) =>
-              handleTimeChange(time, timeString, "timeOut")
-            }
-            style={styles.timePicker}
-            showNow={false} // Disable the dropdown
-            allowClear={false} // Prevent clearing the input
-          />
-        ) : (
-          <Button
-            onClick={() => handleTimeNow("timeOut")}
-            style={
-              formData.timeOut ? styles.timeButton : styles.timeButtonUnactive
-            }
-          >
-            Time Out Now
-          </Button>
-        )}
+        <TimePicker
+          name="timeIn"
+          placeholder="Time In"
+          format="HH:mm"
+          value={formData.timeIn ? moment(formData.timeIn, "HH:mm") : null}
+          onChange={(time, timeString) =>
+            handleTimeChange(time, timeString, "timeIn")
+          }
+          style={styles.timePicker}
+        />
+        <TimePicker
+          name="timeOut"
+          placeholder="Time Out"
+          format="HH:mm"
+          value={formData.timeOut ? moment(formData.timeOut, "HH:mm") : null}
+          onChange={(time, timeString) =>
+            handleTimeChange(time, timeString, "timeOut")
+          }
+          style={styles.timePicker}
+        />
         <Button
           onClick={addTodo}
           style={isButton ? styles.GrayButton : styles.addButton}
@@ -445,16 +391,6 @@ const styles = {
   timePicker: {
     flex: "1",
     minWidth: "200px",
-  },
-  timeButton: {
-    flex: "1",
-    minWidth: "200px",
-    backgroundColor: "#1890ff",
-    color: "white",
-  },
-  timeButtonUnactive: {
-    flex: "1",
-    backgroundColor: "#EBEBE4",
   },
   addButton: {
     padding: "10px 20px",
