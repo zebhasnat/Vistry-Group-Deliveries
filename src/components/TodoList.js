@@ -74,8 +74,7 @@ const TodoList = () => {
     formData.employer.trim().length === 0 ||
     formData.vehicleReg.trim().length === 0 ||
     formData.inductionNum.trim().length === 0 ||
-    formData.timeIn === null ||
-    formData.timeOut === null;
+    formData.timeIn === null;
 
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState(null);
 
@@ -166,6 +165,7 @@ const TodoList = () => {
 
   const handleDelete = (index) => {
     const updatedTodos = todos.filter((_, i) => i !== index);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
     setTodos(updatedTodos);
     setConfirmDeleteIndex(null);
   };
