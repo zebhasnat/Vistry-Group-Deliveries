@@ -12,6 +12,7 @@ import {
   TimePicker,
   AutoComplete,
   Modal,
+  DatePicker,
 } from "antd";
 import "antd/dist/reset.css"; // Import Ant Design styles
 import moment from "moment"; // For handling time formats
@@ -21,7 +22,7 @@ const LOCAL_STORAGE_KEY = "todos";
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
   const [formData, setFormData] = useState({
-    date: new Date().toLocaleDateString(),
+    date: moment().format("YYYY-MM-DD"),
     name: "",
     employer: "",
     vehicleReg: "",
@@ -70,6 +71,7 @@ const TodoList = () => {
   ]);
 
   const isButton =
+    !formData.date ||
     formData.name.trim().length === 0 ||
     formData.employer.trim().length === 0 ||
     formData.vehicleReg.trim().length === 0 ||
@@ -118,6 +120,9 @@ const TodoList = () => {
     setFormData({ ...formData, employer: e.target.value });
   };
 
+  const handleDateChange = (date, dateString) => {
+    setFormData({ ...formData, date: dateString });
+  };
   const addTodo = () => {
     if (editingIndex !== null) {
       const updatedTodos = [...todos];
@@ -134,7 +139,7 @@ const TodoList = () => {
     }
 
     setFormData({
-      date: new Date().toLocaleDateString(),
+      date: moment().format("YYYY-MM-DD"),
       name: "",
       employer: "",
       vehicleReg: "",
@@ -250,6 +255,13 @@ const TodoList = () => {
       </div>
       {/* <h2 style={styles.header}>Vistry Group Deliveries</h2> */}
       <div style={styles.form}>
+        <DatePicker
+          style={styles.input}
+          value={formData.date ? moment(formData.date) : null}
+          onChange={handleDateChange}
+          format="YYYY-MM-DD"
+          placeholder="Select Date"
+        />
         <AutoComplete
           value={formData.name}
           onChange={handleNameChange}
@@ -391,6 +403,7 @@ const styles = {
   timePicker: {
     flex: "1",
     minWidth: "200px",
+    maxWidth: "215px",
   },
   addButton: {
     padding: "10px 20px",
