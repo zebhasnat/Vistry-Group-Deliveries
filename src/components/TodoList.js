@@ -22,7 +22,7 @@ const LOCAL_STORAGE_KEY = "todos";
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
   const [formData, setFormData] = useState({
-    date: moment().format("YYYY-MM-DD"),
+    date: moment().format("DD/MM/YYYY"),
     name: "",
     employer: "",
     vehicleReg: "",
@@ -121,7 +121,9 @@ const TodoList = () => {
   };
 
   const handleDateChange = (date, dateString) => {
-    setFormData({ ...formData, date: dateString });
+    // Convert the date to DD/MM/YYYY format
+    const formattedDate = date ? date.format("DD/MM/YYYY") : "";
+    setFormData({ ...formData, date: formattedDate });
   };
   const addTodo = () => {
     if (editingIndex !== null) {
@@ -139,7 +141,7 @@ const TodoList = () => {
     }
 
     setFormData({
-      date: moment().format("YYYY-MM-DD"),
+      date: moment().format("DD/MM/YYYY"),
       name: "",
       employer: "",
       vehicleReg: "",
@@ -257,9 +259,9 @@ const TodoList = () => {
       <div style={styles.form}>
         <DatePicker
           style={styles.input}
-          value={formData.date ? moment(formData.date) : null}
+          value={formData.date ? moment(formData.date, "DD/MM/YYYY") : null}
           onChange={handleDateChange}
-          format="YYYY-MM-DD"
+          format="DD/MM/YYYY"
           placeholder="Select Date"
         />
         <AutoComplete
